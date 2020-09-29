@@ -26,19 +26,22 @@ public class TollFeeCalculator {
     private int getTotalFeeCost(LocalDateTime[] dates) {
         int totalFee = 0;
         LocalDateTime intervalStart = dates[0];
+        int mexFeeUnder60Minutes = 0;
         for(LocalDateTime date: dates) {
             long diffInMinutes = intervalStart.until(date, ChronoUnit.MINUTES);
-            int fee;
+            int fee = 0;
             if(diffInMinutes > 60) {
-                fee = getTollFeePerPassing(date);
+                fee = getTollFeePerPassing(date) + mexFeeUnder60Minutes;
+                mexFeeUnder60Minutes = 0;
                 intervalStart = date;
             } else {
-                fee = Math.max(getTollFeePerPassing(date), getTollFeePerPassing(intervalStart));
+                mexFeeUnder60Minutes = Math.max(getTollFeePerPassing(date), mexFeeUnder60Minutes);
             }
             totalFee += fee;
             System.out.println(date.toString() + "; Fee: " + fee + "; TotalFee: " + totalFee);
         }
-        return Math.min(totalFee, 60); // Math.max(totalFee, 60);
+
+        return Math.min(totalFee + mexFeeUnder60Minutes, 60); // Math.max(totalFee, 60);
     }
 
     private int getTollFeePerPassing(LocalDateTime date) {
@@ -51,7 +54,7 @@ public class TollFeeCalculator {
         else if (hour == 8 && minute <= 29) return 13;
         else if (hour >= 8 && hour <= 14) return 8; // else if (hour >= 8 && hour <= 14 && minute >= 30 && minute <= 59) return 8;
         else if (hour == 15 && minute <= 29) return 13;
-        else if (hour == 15 || hour == 16) return 18; // else if (hour == 15 && minute >= 0 || hour == 16 && minute <= 59) return 18;
+        else if (hour == 15 && hour <= 16) return 18; // else if (hour == 15 && minute >= 0 || hour == 16 && minute <= 59) return 18;
         else if (hour == 17) return 13;
         else if (hour == 18 && minute <= 29) return 8;
         else return 0;
@@ -62,6 +65,6 @@ public class TollFeeCalculator {
     }
 
     public static void main(String[] args) {
-        new TollFeeCalculator("testData/Lab4_f.txt");
+        new TollFeeCalculator("testData/Lab4.txt");
     }
 }
