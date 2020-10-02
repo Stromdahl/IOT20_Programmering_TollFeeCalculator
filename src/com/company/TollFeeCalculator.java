@@ -16,10 +16,10 @@ public class TollFeeCalculator {
             String[] dateStrings = sc.nextLine().split(", ");
             LocalDateTime[] dates = new LocalDateTime[dateStrings.length];// todo: 1. new LocalDateTime[dateStrings.length-1];
             for(int i = 0; i < dates.length; i++) {
-                try { // todo: 6.
+                try { // todo: 6. if inputed date is not valid then exeption is thrown
                     dates[i] = LocalDateTime.parse(dateStrings[i], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
                 } catch (DateTimeException e) {
-                    System.err.printf("Something went wrong %s is not a valid date\n", dateStrings[i]);
+                    System.err.printf("Could not parse %s, It´s not a valid date\n", dateStrings[i]);
                 }
             }
             System.out.println("The total fee for the inputfile is " + getTotalFeeCost(dates));
@@ -31,27 +31,28 @@ public class TollFeeCalculator {
     private int getTotalFeeCost(LocalDateTime[] dates) {
         int totalFee = 0;
         LocalDateTime intervalStart = dates[0];
-        int maxFeeUnder60Minutes = 0;
+        int maxFeeIn60MinWindow = 0;
         for(LocalDateTime date: dates) {
             if(date == null) continue;
             long diffInMinutes = intervalStart.until(date, ChronoUnit.MINUTES);
             if(diffInMinutes > 60) {
-                totalFee = getTollFeePerPassing(date) + maxFeeUnder60Minutes;
-                System.out.println(date.toString() + " - " + totalFee);
-                maxFeeUnder60Minutes = 0;
+                int fee = getTollFeePerPassing(date) + maxFeeIn60MinWindow;
+                totalFee += fee;
+                System.out.println(date.toString() + " - " + fee + " - " + totalFee);
+                maxFeeIn60MinWindow = 0;
                 intervalStart = date;
             } else {
-                maxFeeUnder60Minutes = Math.max(getTollFeePerPassing(date), maxFeeUnder60Minutes); // todo: 2.
+                maxFeeIn60MinWindow = Math.max(getTollFeePerPassing(date), maxFeeIn60MinWindow); // todo: 2. max fee adds fee even in 60 min window
             }
         }
-        return Math.min(totalFee + maxFeeUnder60Minutes, 60); //Todo 3. Math.max(totalFee, 60);
+        return Math.min(totalFee + maxFeeIn60MinWindow, 60); //Todo 3. Math.max(totalFee, 60);
     }
 
     private int getTollFeePerPassing(LocalDateTime date) {
         if (isTollFreeDate(date)) return 0;
         int hour = date.getHour();
         int minute = date.getMinute();
-        // todo 7.
+        // todo 7. Unneccerery code - removed
         if (hour == 6 && minute <= 29) return 8;
         else if (hour == 6) return 13;
         else if (hour == 7) return 18;
