@@ -1,2 +1,2 @@
 # IOT20_Programmering_TollFeeCalculator
-Deltagare: Mattias Strömdahl, Eddie, Keenan
+Deltagare: Mattias Strömdahl, Edvin Gavell, Keenan Masic
