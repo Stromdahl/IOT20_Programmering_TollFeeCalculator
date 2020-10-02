@@ -10,22 +10,31 @@ import java.util.Scanner;
 
 
 public class TollFeeCalculator {
+
     public TollFeeCalculator(String inputFile) {
+        Scanner sc = null;
         try {
-            Scanner sc = new Scanner(new File(inputFile));
+            sc = new Scanner(new File(inputFile));
             String[] dateStrings = sc.nextLine().split(", ");
-            LocalDateTime[] dates = new LocalDateTime[dateStrings.length];// todo: 1. new LocalDateTime[dateStrings.length-1];
-            for(int i = 0; i < dates.length; i++) {
-                try { // todo: 6. if inputed date is not valid then exeption is thrown
-                    dates[i] = LocalDateTime.parse(dateStrings[i], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-                } catch (DateTimeException e) {
-                    System.err.printf("Could not parse %s, It´s not a valid date\n", dateStrings[i]);
-                }
-            }
+            LocalDateTime[] dates = parseStringsToDates(dateStrings);
             System.out.println("The total fee for the inputfile is " + getTotalFeeCost(dates));
         } catch(IOException e) {
             System.err.println("Could not read file " + inputFile);
+        } finally {
+            if(sc != null) sc.close(); // Todo: 8 file did not close when the reading is done
         }
+    }
+
+    public LocalDateTime[] parseStringsToDates(String[] dateStrings){
+        LocalDateTime[] dates = new LocalDateTime[dateStrings.length];// todo: 1. new LocalDateTime[dateStrings.length-1];
+        for(int i = 0; i < dates.length; i++) {
+            try { // todo: 6. if inputed date is not valid then exeption is thrown
+                dates[i] = LocalDateTime.parse(dateStrings[i], DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+            } catch (DateTimeException e) {
+                System.err.printf("Could not parse %s, It´s not a valid date\n", dateStrings[i]);
+            }
+        }
+        return dates;
     }
 
     private int getTotalFeeCost(LocalDateTime[] dates) {
@@ -48,7 +57,7 @@ public class TollFeeCalculator {
         return Math.min(totalFee + maxFeeIn60MinWindow, 60); //Todo 3. Math.max(totalFee, 60);
     }
 
-    private int getTollFeePerPassing(LocalDateTime date) {
+    int getTollFeePerPassing(LocalDateTime date) {
         if (isTollFreeDate(date)) return 0;
         int hour = date.getHour();
         int minute = date.getMinute();
@@ -65,7 +74,7 @@ public class TollFeeCalculator {
         else return 0;
     }
 
-    private boolean isTollFreeDate(LocalDateTime date) {
+    boolean isTollFreeDate(LocalDateTime date) {
         return date.getDayOfWeek().getValue() == 6 || date.getDayOfWeek().getValue() == 7 || date.getMonth().getValue() == 7;
     }
 
