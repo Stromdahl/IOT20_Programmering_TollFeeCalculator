@@ -5,24 +5,25 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class TollFeeCalculatorTest {
     TollFeeCalculator tollFeeCalculator = new TollFeeCalculator("testData/Lab4_f.txt");
 
-    private final PrintStream standardOut = System.err;
     private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
 
     public LocalDateTime parseStringToDate(String dateString) throws DateTimeException {
         return LocalDateTime.parse(dateString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+    }
+
+    @BeforeEach
+    void setup(){
+        System.setErr(new PrintStream(outputStreamCaptor));
     }
 
     @Test
@@ -37,12 +38,10 @@ class TollFeeCalculatorTest {
         assertEquals("Could not find file: " + inputFile, outputStreamCaptor.toString().trim());
     }
 
+
     @Test
     @DisplayName("Test that getDates returns correct array lengths")
     void testGetDates(){
-
-        System.setErr(new PrintStream(outputStreamCaptor));
-
         // Test that getDates returns a array with correct length
         String[] dateStrings = {
                 "2020-06-01 07:00",
@@ -52,7 +51,7 @@ class TollFeeCalculatorTest {
 
         assertEquals(dateStrings.length, tollFeeCalculator.getDates(dateStrings).length);
 
-        assertEquals(String.format("Could not parse \"%s\", it´s not a valid date\n", dateStrings[1]), outputStreamCaptor.toString().trim());
+        assertEquals(String.format("Could not parse \"%s\", it´s not a valid date", dateStrings[1]), outputStreamCaptor.toString().trim());
 
     }
 
@@ -118,7 +117,7 @@ class TollFeeCalculatorTest {
         assertEquals(8, tollFeeCalculator.getTollFeePerPassing(parseStringToDate("2020-06-01 14:00")));
         assertEquals(13, tollFeeCalculator.getTollFeePerPassing(parseStringToDate("2020-06-01 15:00")));
         assertEquals(18, tollFeeCalculator.getTollFeePerPassing(parseStringToDate("2020-06-01 15:30")));
-        assertEquals(13, tollFeeCalculator.getTollFeePerPassing(parseStringToDate("2020-06-01 16:00")));
+        assertEquals(18, tollFeeCalculator.getTollFeePerPassing(parseStringToDate("2020-06-01 16:00")));
         assertEquals(13, tollFeeCalculator.getTollFeePerPassing(parseStringToDate("2020-06-01 17:00")));
         assertEquals(8, tollFeeCalculator.getTollFeePerPassing(parseStringToDate("2020-06-01 18:00")));
         assertEquals(0, tollFeeCalculator.getTollFeePerPassing(parseStringToDate("2020-06-01 23:00")));
